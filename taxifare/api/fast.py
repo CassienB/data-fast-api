@@ -1,6 +1,11 @@
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from taxifare.ml_logic.preprocessor import preprocess_features
+import pandas as pd
+from taxifare.ml_logic.registry import load_model
+from taxifare.ml_logic.params import COLUMN_NAMES_RAW
+import numpy as np
 
 app = FastAPI()
 
@@ -29,7 +34,21 @@ def predict(pickup_datetime: datetime,  # 2013-07-06 17:18:00
     without type hinting we need to manually convert
     the parameters of the functions which are all received as strings
     """
-    pass  # YOUR CODE HERE
+    X_pred = pd.DataFrame(dict(
+            key=[str(pickup_datetime)],  # useless but the pipeline requires it
+            pickup_datetime=[pickup_datetime],
+            pickup_longitude=[float(pickup_longitude)],
+            pickup_latitude=[float(pickup_latitude)],
+            dropoff_longitude=[float(dropoff_longitude)],
+            dropoff_latitude=[float(dropoff_latitude)],
+            passenger_count=[int(passenger_count)]
+        ))
+    X_processed = preprocess_features(X_pred)
+
+    model = load_model()
+    y_pred = model.predict(X_processed)
+
+    return {'fare_amount':float(y_pred)}
 
 
 @app.get("/")

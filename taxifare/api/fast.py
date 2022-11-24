@@ -34,4 +34,4 @@ def predict(pickup_datetime: datetime,  # 2013-07-06 17:18:00
 
 @app.get("/")
 def root():
-    pass  # YOUR CODE HERE
+    return {'greeting': 'Hello'}
